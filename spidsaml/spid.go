@@ -29,6 +29,8 @@ const (
 // SP represents our Service Provider
 type SP struct {
 	EntityID                   string
+	KeyStr                     string
+	CertStr                    string
 	KeyFile                    string
 	CertFile                   string
 	AssertionConsumerServices  []string
@@ -60,8 +62,13 @@ type Organization struct {
 // Cert returns the certificate of this Service Provider.
 func (sp *SP) Cert() *x509.Certificate {
 	if sp._cert == nil {
-		// read file as a byte array
-		byteValue, _ := ioutil.ReadFile(sp.CertFile)
+		var byteValue []byte
+		if sp.CertStr == "" {
+			// read file as a byte array
+			byteValue, _ = ioutil.ReadFile(sp.CertFile)
+		} else {
+			byteValue = []byte(sp.CertStr)
+		}
 
 		block, _ := pem.Decode(byteValue)
 		if block == nil || block.Type != "CERTIFICATE" {
@@ -80,8 +87,13 @@ func (sp *SP) Cert() *x509.Certificate {
 // Key returns the private key of this Service Provider
 func (sp *SP) Key() *rsa.PrivateKey {
 	if sp._key == nil {
-		// read file as a byte array
-		byteValue, _ := ioutil.ReadFile(sp.KeyFile)
+		var byteValue []byte
+		if sp.KeyStr == "" {
+			// read file as a byte array
+			byteValue, _ = ioutil.ReadFile(sp.KeyFile)
+		} else {
+			byteValue = []byte(sp.KeyStr)
+		}
 
 		block, _ := pem.Decode(byteValue)
 		if block == nil || block.Type != "RSA PRIVATE KEY" {
@@ -184,7 +196,7 @@ func (sp *SP) Metadata() string {
 			<spid:Private/>
 		</md:Extensions>
 		<md:EmailAddress>tech-info@example.org</md:EmailAddress>
-		<md:TelephoneNumber>+39 8472345634785</md:TelephoneNumber>
+		<md:TelephoneNumber>+398472345634785</md:TelephoneNumber>
 	</md:ContactPerson>
 
 </md:EntityDescriptor>
