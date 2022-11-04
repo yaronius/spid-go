@@ -1,4 +1,4 @@
-module github.com/yaronius/spid-go
+module github.com/yaronius/spid-go/spidsaml
 
 go 1.18
 
