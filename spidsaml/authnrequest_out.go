@@ -2,6 +2,7 @@ package spidsaml
 
 import (
 	"bytes"
+	"log"
 	"text/template"
 )
 
@@ -91,6 +92,9 @@ func (authnreq *AuthnRequest) XML(binding SAMLBinding) []byte {
 	t := template.Must(template.New("req").Parse(tmpl))
 	var metadata bytes.Buffer
 	t.Execute(&metadata, data)
+
+	log.Printf("authn request = %s", metadata.String())
+
 	return metadata.Bytes()
 }
 

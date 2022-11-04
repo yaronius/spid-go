@@ -35,6 +35,7 @@ type SP struct {
 	SingleLogoutServices       map[string]SAMLBinding
 	AttributeConsumingServices []AttributeConsumingService
 	IDP                        map[string]*IDP
+	Organization               Organization
 	_cert                      *x509.Certificate
 	_key                       *rsa.PrivateKey
 }
@@ -47,6 +48,13 @@ type Session struct {
 	AssertionXML []byte
 	Level        int
 	Attributes   map[string]string
+}
+
+// Organization defines SP Organization data
+type Organization struct {
+	Names        []string
+	DisplayNames []string
+	URLs         []string
 }
 
 // Cert returns the certificate of this Service Provider.
@@ -112,7 +120,8 @@ func (sp *SP) Metadata() string {
 	const tmpl = `<?xml version="1.0"?> 
 <md:EntityDescriptor 
     xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"  
-    xmlns:ds="http://www.w3.org/2000/09/xmldsig#"  
+    xmlns:ds="http://www.w3.org/2000/09/xmldsig#" 
+	xmlns:spid="https://spid.gov.it/saml-extensions"
     entityID="{{.EntityID}}"  
     ID="_681a637-6cd4-434f-92c3-4fed720b2ad8"> 
      
@@ -155,6 +164,28 @@ func (sp *SP) Metadata() string {
         {{ end }}
 
     </md:SPSSODescriptor> 
+
+	<md:Organization>
+		{{ range $name := .Organization.Names }}
+		<md:OrganizationName xml:lang="it">{{ $name }}</md:OrganizationName>
+		{{ end }}
+		{{ range $displayName := .Organization.DisplayNames }}
+		<md:OrganizationDisplayName xml:lang="it">{{ $displayName }}</md:OrganizationDisplayName>
+		{{ end }}
+		{{ range $url := .Organization.URLs }}
+		<md:OrganizationURL xml:lang="it">{{ $url }}</md:OrganizationURL>
+		{{ end }}
+	</md:Organization>
+
+	<md:ContactPerson contactType="other">
+		<md:Extensions>
+			<spid:VATNumber>IT12345678901</spid:VATNumber>
+			<spid:FiscalCode>XYZABCAAMGGJ000W</spid:FiscalCode>
+			<spid:Private/>
+		</md:Extensions>
+		<md:EmailAddress>tech-info@example.org</md:EmailAddress>
+		<md:TelephoneNumber>+39 8472345634785</md:TelephoneNumber>
+	</md:ContactPerson>
 
 </md:EntityDescriptor>
 `

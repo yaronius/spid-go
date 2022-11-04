@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 
-	"../spidsaml"
+	"github.com/yaronius/spid-go/spidsaml"
 )
 
 // This demo application shows how to use the spidsaml package
@@ -27,15 +27,15 @@ var authnReqID, logoutReqID string
 
 func main() {
 	// Initialize our SPID object with information about this Service Provider
-	sp = &spidsaml.SP{
-		EntityID: "https://www.foobar.it/",
-		KeyFile:  "sp.key",
-		CertFile: "sp.pem",
+	sp = &spidsaml.SP{ // http://docker.for.mac.host.internal:8000/metadata
+		EntityID: "http://docker.for.mac.host.internal:8000",
+		KeyFile:  "example/sp.key",
+		CertFile: "example/sp.pem",
 		AssertionConsumerServices: []string{
-			"http://localhost:8000/spid-sso",
+			"http://docker.for.mac.host.internal:8000/spid-sso",
 		},
 		SingleLogoutServices: map[string]spidsaml.SAMLBinding{
-			"http://localhost:8000/spid-slo": spidsaml.HTTPRedirect,
+			"http://docker.for.mac.host.internal:8000/spid-slo": spidsaml.HTTPRedirect,
 		},
 		AttributeConsumingServices: []spidsaml.AttributeConsumingService{
 			{
@@ -43,10 +43,15 @@ func main() {
 				Attributes:  []string{"fiscalNumber", "name", "familyName", "dateOfBirth"},
 			},
 		},
+		Organization: spidsaml.Organization{
+			Names:        []string{"Foobar"},
+			DisplayNames: []string{"Foobar"},
+			URLs:         []string{"http://docker.for.mac.host.internal:8000"},
+		},
 	}
 
 	// Load Identity Providers from their XML metadata
-	err := sp.LoadIDPMetadata("idp_metadata")
+	err := sp.LoadIDPMetadata("example/idp_metadata")
 	if err != nil {
 		fmt.Print("Failed to load IdP metadata: ")
 		fmt.Println(err)
@@ -137,7 +142,7 @@ func spidLogin(w http.ResponseWriter, r *http.Request) {
 
 	// Craft the AuthnRequest.
 	authnreq := sp.NewAuthnRequest(idp)
-	//authnreq.AcsURL = "http://localhost:3000/spid-sso"
+	// authnreq.AcsURL = "http://localhost:3000/spid-sso"
 	authnreq.AcsIndex = 0
 	authnreq.AttrIndex = 0
 	authnreq.Level = 1
@@ -147,8 +152,8 @@ func spidLogin(w http.ResponseWriter, r *http.Request) {
 	authnReqID = authnreq.ID
 
 	// Uncomment the following lines to use the HTTP-POST binding instead of HTTP-Redirect:
-	//w.Write(authnreq.PostForm())
-	//return
+	// w.Write(authnreq.PostForm())
+	// return
 
 	// Redirect user to the IdP using its HTTP-Redirect binding.
 	http.Redirect(w, r, authnreq.RedirectURL(), http.StatusSeeOther)
@@ -183,7 +188,7 @@ func spidSSO(w http.ResponseWriter, r *http.Request) {
 
 	// Log response as required by the SPID rules.
 	// Hint: log it in a way that does not mangle whitespace preventing signature from
-	// being verified at a later time
+	//  being verified at a later time
 	fmt.Printf("SPID Response: %s\n", response.XML)
 
 	if response.Success() {
@@ -224,8 +229,8 @@ func spidLogout(w http.ResponseWriter, r *http.Request) {
 	logoutReqID = logoutreq.ID
 
 	// Uncomment the following line to use the HTTP-POST binding instead of HTTP-Redirect:
-	//w.Write(logoutreq.PostForm())
-	//return
+	// w.Write(logoutreq.PostForm())
+	// return
 
 	// Redirect user to the Identity Provider for logout.
 	http.Redirect(w, r, logoutreq.RedirectURL(), http.StatusSeeOther)
@@ -282,7 +287,7 @@ func spidSLO(w http.ResponseWriter, r *http.Request) {
 		// Now we should retrieve the local session corresponding to the SPID
 		// session logoutreq.SessionIndex(). However, since we are implementing a HTTP-POST
 		// binding, this HTTP request comes from the user agent so the current user
-		// session is automatically the right one. This simplifies things a lot as
+		//  session is automatically the right one. This simplifies things a lot as
 		// retrieving another session by SPID session ID is tricky without a more
 		// complex architecture.
 		status := spidsaml.SuccessLogout
