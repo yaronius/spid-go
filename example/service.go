@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 
-	"../spidsaml"
+	"github.com/yaronius/spid-go/spidsaml"
 )
 
 // This demo application shows how to use the spidsaml package
@@ -137,7 +137,7 @@ func spidLogin(w http.ResponseWriter, r *http.Request) {
 
 	// Craft the AuthnRequest.
 	authnreq := sp.NewAuthnRequest(idp)
-	//authnreq.AcsURL = "http://localhost:3000/spid-sso"
+	// authnreq.AcsURL = "http://localhost:3000/spid-sso"
 	authnreq.AcsIndex = 0
 	authnreq.AttrIndex = 0
 	authnreq.Level = 1
@@ -147,8 +147,8 @@ func spidLogin(w http.ResponseWriter, r *http.Request) {
 	authnReqID = authnreq.ID
 
 	// Uncomment the following lines to use the HTTP-POST binding instead of HTTP-Redirect:
-	//w.Write(authnreq.PostForm())
-	//return
+	// w.Write(authnreq.PostForm())
+	// return
 
 	// Redirect user to the IdP using its HTTP-Redirect binding.
 	http.Redirect(w, r, authnreq.RedirectURL(), http.StatusSeeOther)
@@ -183,7 +183,7 @@ func spidSSO(w http.ResponseWriter, r *http.Request) {
 
 	// Log response as required by the SPID rules.
 	// Hint: log it in a way that does not mangle whitespace preventing signature from
-	// being verified at a later time
+	//  being verified at a later time
 	fmt.Printf("SPID Response: %s\n", response.XML)
 
 	if response.Success() {
@@ -224,8 +224,8 @@ func spidLogout(w http.ResponseWriter, r *http.Request) {
 	logoutReqID = logoutreq.ID
 
 	// Uncomment the following line to use the HTTP-POST binding instead of HTTP-Redirect:
-	//w.Write(logoutreq.PostForm())
-	//return
+	// w.Write(logoutreq.PostForm())
+	// return
 
 	// Redirect user to the Identity Provider for logout.
 	http.Redirect(w, r, logoutreq.RedirectURL(), http.StatusSeeOther)
@@ -282,7 +282,7 @@ func spidSLO(w http.ResponseWriter, r *http.Request) {
 		// Now we should retrieve the local session corresponding to the SPID
 		// session logoutreq.SessionIndex(). However, since we are implementing a HTTP-POST
 		// binding, this HTTP request comes from the user agent so the current user
-		// session is automatically the right one. This simplifies things a lot as
+		//  session is automatically the right one. This simplifies things a lot as
 		// retrieving another session by SPID session ID is tricky without a more
 		// complex architecture.
 		status := spidsaml.SuccessLogout
