@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/beevik/etree v1.0.1
-	github.com/crewjam/go-xmlsec v0.0.0-20170116132012-1aa2f9374afa
+	github.com/crewjam/go-xmlsec v0.0.0-20200414151428-d2b1a58f7262
 )
 
 require (
